@@ -12,18 +12,18 @@
 **How I verified:** This passed the default test suite.
 
 ## Comment 3 — Missing test
-**What I did:**
-**How I verified:**
+**What I did:** I added a test_watchlist.py and realized I have to write similar tests for watchlist_service to check if the first 3 comments are fixed so I wrote those.
+**How I verified:** I ran the updated test suite with add_watchlist tests for creating new entries, duplicates check, and nonexistent film check.
 
 ## Comment 4 — Default visibility
-**My position:**
-**Reasoning:**
-**Tradeoff acknowledged:**
+**My position:** The user's watchlist should remain public for the purposes of this app since users typically like to share watchlists with friends.
+**Reasoning:** However, until there are endpoints established for other users viewing each others' watchlists, leaving it exposed as the app is being developed unnecessarily leaves the app vulnerable to security issues. Until there are secure viewpoints established for cross-user visibility. The default should be set to private.
+**Tradeoff acknowledged:** While public may be best for this app's purpose, it should be noted that users may skip over warnings and save items to their list, thinking their list is default private and only viewable to themselves. This may backfire into a source of user frustration if not dealt with properly.
 
 ## Comment 5 — Sort order
-**My position:**
-**Reasoning:**
-**Engagement with reviewer's point:**
+**My position:** I agree with the comment advocating for a change to date added sorting order.
+**Reasoning:** That seems like a more intuitive format for adding and removing from watchlist and watching shows based on what is more freshly on user's minds.
+**Engagement with reviewer's point:** The reviewer's point mirrors how get_collection() already sorts (newest first by date_added), so this also brings the watchlist in line with the rest of the app's conventions instead of being the one view sorted differently (alphabetically by title). I changed get_watchlist() in watchlist_service.py to order by WatchlistEntry.date_added.desc(), matching add_to_collection()'s pattern.
 
 ## Comment 6 — Rebase
 **What conflicted:**
