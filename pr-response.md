@@ -47,15 +47,19 @@ In each case I made the final call on the actual position, code, or wording; I u
 **What I did:** I wrote an additional test, test_add_to_watchlist_after_remove_allows_readd, that adds a film, removes it, then adds it again and confirms it succeeds and only one entry exists afterward.
 **Why I chose this case:** The deduplication logic (Comment 2) and the new remove_from_watchlist() function were both written and tested independently, but nothing confirmed they interact correctly. Since the unique constraint on (user_id, film_id) is what blocks duplicates, I wanted to be sure that deleting a row actually frees up that constraint so a film can be re-added later, rather than the deletion silently leaving stale state that permanently blocks that user/film pair.
 
+### Visibility toggle on add_to_watchlist()
+**What I did:** I added an optional public parameter to add_to_watchlist(user_id, film_id, public=False), so callers can explicitly set a watchlist entry's visibility at creation time instead of always relying on the model's default. I updated the POST /watchlist/<user_id>/add route to read an optional "public" key from the request body and pass it through.
+**How I verified:** I added test_add_to_watchlist_public_toggle, confirming that passing public=True creates an entry with public visibility, and that omitting it still defaults to private, matching Comment 4's reasoning.
+
 ## PR Description
 
 ### Overview
 This PR adds the watchlist feature to CineLog: users can save films they intend to watch, remove them, and view their saved list. It mirrors the existing collection feature's structure (model, service, routes) and includes:
-- `add_to_watchlist(user_id, film_id)`: adds a film to a user's watchlist, raising `FilmNotFoundError` if the film does not exist and `AlreadyInCollectionError` if it is already on the watchlist (checked both at the application level and enforced by a DB-level unique constraint).
+- `add_to_watchlist(user_id, film_id, public=False)`: adds a film to a user's watchlist, raising `FilmNotFoundError` if the film does not exist and `AlreadyInCollectionError` if it is already on the watchlist (checked both at the application level and enforced by a DB-level unique constraint). Callers may optionally pass `public=True` to make the entry visible from creation.
 - `remove_from_watchlist(user_id, film_id)`: removes a film from a user's watchlist, raising `NotInCollectionError` if the film isn't on the watchlist.
 - `get_watchlist(user_id)`: returns all films on a user's watchlist.
 - `GET /watchlist/<user_id>`: returns a user's watchlist as JSON.
-- `POST /watchlist/<user_id>/add`: adds a film to a user's watchlist given a `film_id` in the request body.
+- `POST /watchlist/<user_id>/add`: adds a film to a user's watchlist given a `film_id` (and optional `public` flag) in the request body.
 - `POST /watchlist/<user_id>/remove`: removes a film from a user's watchlist given a `film_id` in the request body.
 
 ### Design decisions
@@ -81,6 +85,15 @@ This PR adds the watchlist feature to CineLog: users can save films they intend 
    ```
    Expect a JSON array of films, each including `date_added` and `public: false`.
 7. Add a second film and confirm it appears first in the response (newest `date_added` first).
+8. Remove a film from the watchlist:
+   ```
+   POST /watchlist/<user_id>/remove
+   Content-Type: application/json
+
+   { "film_id": "<film_id>" }
+   ```
+   Expect a `200` response confirming removal, and the film no longer appears in a subsequent `GET /watchlist/<user_id>` call.
+9. Add a film with `{ "film_id": "<film_id>", "public": true }`. Expect the response entry to include `"public": true`, overriding the private default.
 
 ## Git log --online command screenshot on the feature/watchlist branch
 

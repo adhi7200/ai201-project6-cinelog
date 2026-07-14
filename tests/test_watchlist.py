@@ -92,6 +92,23 @@ def test_add_to_watchlist_duplicate_raises(app, sample_user, sample_film):
         assert count == 1
 
 
+# ── Visibility toggle ────────────────────────────────────────────────────────
+
+def test_add_to_watchlist_public_toggle(app, sample_user, sample_film):
+    """
+    Passing public=True should create a public entry; omitting it should
+    still default to private (False).
+    """
+    with app.app_context():
+        public_entry = add_to_watchlist(user_id=sample_user, film_id=sample_film, public=True)
+        assert public_entry.public is True
+
+        remove_from_watchlist(user_id=sample_user, film_id=sample_film)
+
+        default_entry = add_to_watchlist(user_id=sample_user, film_id=sample_film)
+        assert default_entry.public is False
+
+
 # ── Remove ───────────────────────────────────────────────────────────────────
 
 def test_remove_from_watchlist_deletes_entry(app, sample_user, sample_film):
