@@ -1,8 +1,8 @@
 """
-tests/test_watchlist.py — CineLog
+tests/test_watchlist.py: CineLog
 
 Tests for the watchlist service.
-These tests demonstrate the patterns used across the codebase — read them
+These tests demonstrate the patterns used across the codebase. Read them
 before writing your own tests for the watchlist feature (see Comment 4).
 """
 

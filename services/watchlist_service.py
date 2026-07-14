@@ -1,5 +1,5 @@
 """
-services/watchlist_service.py — CineLog (feature/watchlist branch)
+services/watchlist_service.py: CineLog (feature/watchlist branch)
 
 Business logic for the watchlist feature.
 """

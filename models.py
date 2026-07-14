@@ -1,8 +1,8 @@
 """
-models.py — CineLog
+models.py: CineLog
 
 SQLAlchemy models. Film IDs use UUIDs throughout.
-(This is the post-refactor state on main — integer IDs were migrated to UUIDs.)
+(This is the post-refactor state on main; integer IDs were migrated to UUIDs.)
 """
 
 import uuid
@@ -27,7 +27,7 @@ class User(db.Model):
 
 
 class Film(db.Model):
-    # Film IDs are UUIDs — refactored from integer in commit:
+    # Film IDs are UUIDs, refactored from integer in commit:
     # "refactor: migrate film IDs from integer to UUID"
     id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
     title = db.Column(db.String(200), nullable=False)
