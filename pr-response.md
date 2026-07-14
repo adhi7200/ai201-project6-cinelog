@@ -70,4 +70,6 @@ This PR adds the watchlist feature to CineLog: users can save films they intend 
    Expect a JSON array of films, each including `date_added` and `public: false`.
 7. Add a second film and confirm it appears first in the response (newest `date_added` first).
 
+## Git log --online command screenshot on the feature/watchlist branch
+
 ![Git log oneline output](image.png)
