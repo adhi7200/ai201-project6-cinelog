@@ -43,6 +43,10 @@ In each case I made the final call on the actual position, code, or wording; I u
 **What I did:** I added a remove_from_watchlist(user_id, film_id) function to services/watchlist_service.py, following the same pattern as remove_from_collection() in collection_service.py: look up the entry by user_id and film_id, raise NotInCollectionError if it isn't found, otherwise delete it and commit. I also added a POST /watchlist/<user_id>/remove route mirroring the existing add route, so the feature is reachable through the API, not just the service layer.
 **How I verified:** I added two tests: test_remove_from_watchlist_deletes_entry (adds then removes a film, confirms the row is gone from the database) and test_remove_from_watchlist_not_present_raises (confirms removing a film that was never added raises NotInCollectionError instead of silently succeeding). Both pass alongside the full existing suite.
 
+### Second test: add-then-remove-then-readd
+**What I did:** I wrote an additional test, test_add_to_watchlist_after_remove_allows_readd, that adds a film, removes it, then adds it again and confirms it succeeds and only one entry exists afterward.
+**Why I chose this case:** The deduplication logic (Comment 2) and the new remove_from_watchlist() function were both written and tested independently, but nothing confirmed they interact correctly. Since the unique constraint on (user_id, film_id) is what blocks duplicates, I wanted to be sure that deleting a row actually frees up that constraint so a film can be re-added later, rather than the deletion silently leaving stale state that permanently blocks that user/film pair.
+
 ## PR Description
 
 ### Overview

@@ -120,6 +120,25 @@ def test_remove_from_watchlist_not_present_raises(app, sample_user, sample_film)
             remove_from_watchlist(user_id=sample_user, film_id=sample_film)
 
 
+def test_add_to_watchlist_after_remove_allows_readd(app, sample_user, sample_film):
+    """
+    Removing a film from the watchlist should free up the unique constraint on
+    (user_id, film_id), so the same film can be added again afterward instead
+    of the deletion leaving stale state that permanently blocks a re-add.
+    """
+    with app.app_context():
+        add_to_watchlist(user_id=sample_user, film_id=sample_film)
+        remove_from_watchlist(user_id=sample_user, film_id=sample_film)
+
+        entry = add_to_watchlist(user_id=sample_user, film_id=sample_film)
+        assert entry is not None
+
+        count = WatchlistEntry.query.filter_by(
+            user_id=sample_user, film_id=sample_film
+        ).count()
+        assert count == 1
+
+
 # ── Nonexistent film ─────────────────────────────────────────────────────────
 
 def test_add_to_watchlist_nonexistent_film_raises(app, sample_user):
