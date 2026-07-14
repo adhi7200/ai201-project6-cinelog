@@ -37,14 +37,22 @@ In each case I made the final call on the actual position, code, or wording; I u
 **How I resolved it:** I resolved this by keeping the union of both and committing as is. Next I resolved the data type conflict by updating all the models.py fields to reflect the UUID format requested in the assignment.
 **How I verified no conflict remains:** I verified this with the help of Claude through the git log --merges command to ensure and empty merge commit history and the test suite check to make sure everything works.
 
+## Stretch Features
+
+### Add remove_from_watchlist()
+**What I did:** I added a remove_from_watchlist(user_id, film_id) function to services/watchlist_service.py, following the same pattern as remove_from_collection() in collection_service.py: look up the entry by user_id and film_id, raise NotInCollectionError if it isn't found, otherwise delete it and commit. I also added a POST /watchlist/<user_id>/remove route mirroring the existing add route, so the feature is reachable through the API, not just the service layer.
+**How I verified:** I added two tests: test_remove_from_watchlist_deletes_entry (adds then removes a film, confirms the row is gone from the database) and test_remove_from_watchlist_not_present_raises (confirms removing a film that was never added raises NotInCollectionError instead of silently succeeding). Both pass alongside the full existing suite.
+
 ## PR Description
 
 ### Overview
-This PR adds the watchlist feature to CineLog: users can save films they intend to watch and view their saved list. It mirrors the existing collection feature's structure (model, service, routes) and includes:
+This PR adds the watchlist feature to CineLog: users can save films they intend to watch, remove them, and view their saved list. It mirrors the existing collection feature's structure (model, service, routes) and includes:
 - `add_to_watchlist(user_id, film_id)`: adds a film to a user's watchlist, raising `FilmNotFoundError` if the film does not exist and `AlreadyInCollectionError` if it is already on the watchlist (checked both at the application level and enforced by a DB-level unique constraint).
+- `remove_from_watchlist(user_id, film_id)`: removes a film from a user's watchlist, raising `NotInCollectionError` if the film isn't on the watchlist.
 - `get_watchlist(user_id)`: returns all films on a user's watchlist.
 - `GET /watchlist/<user_id>`: returns a user's watchlist as JSON.
 - `POST /watchlist/<user_id>/add`: adds a film to a user's watchlist given a `film_id` in the request body.
+- `POST /watchlist/<user_id>/remove`: removes a film from a user's watchlist given a `film_id` in the request body.
 
 ### Design decisions
 - **Default visibility:** `WatchlistEntry.public` defaults to `False` (private). Watchlists could reasonably become a public/shareable feature later, but since there is no endpoint or authorization check yet for viewing another user's watchlist, defaulting to public would expose data with no way to enforce who can see it. Private-by-default fails safe until sharing is actually implemented.
